@@ -4,53 +4,24 @@
     "type": "split",
     "children": [
       {
-        "id": "7706c0462044995c",
+        "id": "e8abbf5bd325fdfe",
         "type": "tabs",
         "children": [
           {
-            "id": "1e95d729297b5c0c",
+            "id": "ab40a81478fbde10",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Признаки.md",
+                "file": "Характеристики системы/Рассчет характеристик системы.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Признаки"
-            }
-          },
-          {
-            "id": "4f96587789c31cca",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "EDA.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "EDA"
-            }
-          },
-          {
-            "id": "02141678794867f7",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "technical_spec_revised_5kwh.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "technical_spec_revised_5kwh"
+              "title": "Рассчет характеристик системы"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -123,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "EDA.md",
+                "file": "Характеристики системы/Рассчет характеристик системы.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -133,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Обратные ссылки для EDA"
+              "title": "Обратные ссылки для Рассчет характеристик системы"
             }
           },
           {
@@ -142,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "EDA.md",
+                "file": "Характеристики системы/Рассчет характеристик системы.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Исходящие ссылки из EDA"
+              "title": "Исходящие ссылки из Рассчет характеристик системы"
             }
           },
           {
@@ -185,13 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "EDA.md",
+                "file": "Характеристики системы/Рассчет характеристик системы.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Структура EDA"
+              "title": "Структура Рассчет характеристик системы"
             }
           }
         ]
@@ -212,14 +183,25 @@
       "bases:Создать новую базу": false
     }
   },
-  "active": "4f96587789c31cca",
+  "active": "ab40a81478fbde10",
   "lastOpenFiles": [
+    "Характеристики системы/Рассчет характеристик системы.md",
+    "Характеристики системы/Рассчет характеристик системы.md",
+    "Модель/Алгоритм почасовой итерации модели.md",
+    "Модель/Итоговые характеристики.md",
+    "Модель/Output.md",
+    "Без названия.md",
+    "Модель",
+    "Характеристики системы/Коэффициент температурной поправки.md",
+    "Данные/Признаки.md",
+    "Характеристики системы",
+    "Данные",
+    "Характеристики системы/Почасовая вероятность отказа.md",
+    "Данные/EDA.md",
     "technical_spec_revised_5kwh.md",
     "technical_spec_revised.md",
     "technical_spec.md",
-    "EDA результаты.md",
-    "EDA.md",
-    "Признаки.md",
+    "Данные/EDA результаты.md",
     "weather_without_GTI_45_020131_38_932607 1.csv",
     "weather_without_GTI_45_020131_38_932607.csv",
     "Добро пожаловать.md"
