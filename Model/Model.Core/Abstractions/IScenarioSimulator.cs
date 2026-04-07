@@ -3,9 +3,8 @@ using Model.Core.Results.PerHour;
 
 namespace Model.Core.Abstractions;
 
-public interface IScenarioSimulator<in TConfig, THourResult, TRunSummary>
+public interface IScenarioSimulator<THourResult, TRunSummary>
 {
     SimulationResult<THourResult, TRunSummary> Run(
-        IReadOnlyList<WeatherPoint> weather,
-        TConfig config);
+        IReadOnlyList<WeatherPoint> weather);
 }

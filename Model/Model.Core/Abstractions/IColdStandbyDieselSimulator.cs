@@ -5,6 +5,6 @@ using Model.Core.Results.PerHour;
 namespace Model.Core.Abstractions;
 
 public interface IColdStandbyDieselSimulator
-    : IScenarioSimulator<ColdStandbyScenarioConfig, ColdStandbyHourResult, ColdStandbyRunSummary>
+    : IScenarioSimulator<ColdStandbyHourResult, ColdStandbyRunSummary>
 {
 }

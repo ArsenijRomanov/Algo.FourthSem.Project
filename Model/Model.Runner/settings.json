@@ -1,0 +1,62 @@
+{
+  "scenarioType": "ColdStandby",
+  "singleRun": false,
+  "singleRunSeed": 17,
+  "runCount": 1000,
+  "weatherCsvPath": "data/weather_msk.csv",
+  "outputDirectory": "../../../Results/output",
+
+  "hybrid": {
+    "load": {
+      "constantLoadKWhPerHour": 1.0
+    },
+    "pv": {
+      "pNomW": 3295.0,
+      "tempCoefficientGamma": -0.0035,
+      "moduleEfficiencyRef": 0.204,
+      "tauAlpha": 0.9,
+      "referenceCellTemperatureC": 25.0,
+      "noctAdjustedC": 47.0
+    },
+    "battery": {
+      "nominalCapacityKWh": 5.12,
+      "minAllowedSocKWh": 1.024,
+      "chargeEfficiency": 0.97,
+      "dischargeEfficiency": 0.97,
+      "initialSocKWh": 5.12
+    },
+    "diesel": {
+      "specificFuelConsumptionLPerKWh": 0.3,
+      "failureProbabilityPerMonth": 0.01,
+      "repairTimeHours": {
+        "min": 16,
+        "mode": 24,
+        "max": 36
+      }
+    }
+  },
+
+  "coldStandby": {
+    "load": {
+      "constantLoadKWhPerHour": 1.0
+    },
+    "primaryDiesel": {
+      "specificFuelConsumptionLPerKWh": 0.3,
+      "failureProbabilityPerMonth": 0.01,
+      "repairTimeHours": {
+        "min": 16,
+        "mode": 24,
+        "max": 36
+      }
+    },
+    "reserveDiesel": {
+      "specificFuelConsumptionLPerKWh": 0.3,
+      "failureProbabilityPerMonth": 0.01,
+      "repairTimeHours": {
+        "min": 16,
+        "mode": 24,
+        "max": 36
+      }
+    }
+  }
+}
