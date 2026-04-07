@@ -1,7 +1,7 @@
 {
   "paths": {
-    "results_root": "Model.Runner/Results",
-    "output_dir": "Results"
+    "results_root": "../Model/Model.Runner/Results",
+    "output_dir": "AnalysisResults"
   },
 
   "study_mapping": {
@@ -14,48 +14,31 @@
   "economic_assumptions": {
     "currency": "USD",
     "project_horizon_years": 10,
-    "discount_rate": 0.12,
+    "discount_rate": 0.16,
     "fuel_price_usd_per_l": 5.0,
     "hybrid_capex_usd": 15000.0,
-    "baseline_capex_usd": 0.0,
-    "annual_om_baseline_usd": 0.0,
-    "annual_om_hybrid_usd": 0.0,
-    "battery_replacement": {
-      "enabled": false,
-      "year": 6,
-      "cost_usd": 0.0
-    },
-    "salvage_value": {
-      "enabled": false,
-      "year": 10,
-      "value_usd": 0.0
-    },
-    "fuel_price_escalation_rate": 0.0,
-    "om_escalation_rate": 0.0
+    "annual_om_baseline_usd": 700.0,
+    "annual_om_hybrid_usd": 300.0
   },
 
   "outage_loss_model": {
     "mode": "per_down_hour",
-    "loss_usd_per_down_hour": 1000.0,
+    "loss_usd_per_down_hour": 3.52,
     "also_count_partial_unserved_hours": false,
     "loss_usd_per_unserved_kwh": 0.0
   },
 
   "analysis_options": {
     "use_mc_for_final_economics": true,
+
     "use_single_run_for_time_series_plots": true,
+
     "simple_payback": true,
+
     "discounted_payback": true,
     "compute_npv": true,
     "compute_pi": true,
     "compute_irr": true
-  },
-
-  "sensitivity": {
-    "enabled": true,
-    "discount_rate_values": [0.08, 0.1, 0.12, 0.15, 0.2],
-    "loss_usd_per_down_hour_values": [0, 500, 1000, 2000, 3000, 5000],
-    "fuel_price_usd_per_l_values": [4.0, 5.0, 6.0]
   },
 
   "report_outputs": {
