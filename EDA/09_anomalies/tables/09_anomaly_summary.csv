@@ -4,7 +4,6 @@ iqr_outlier_GHI_W_m2,4702
 weak_radiation_at_night,2362
 iqr_outlier_wind_m_s,1937
 iqr_outlier_DHI_W_m2,1432
-isolation_forest,439
 rolling_zscore_cloud_pct,197
 rolling_zscore_DNI_W_m2,124
 rolling_zscore_GTI_W_m2,5

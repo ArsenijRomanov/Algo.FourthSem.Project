@@ -1,4 +1,46 @@
 #!/usr/bin/env python3
+
+# python analyze_results.py --config analysis_config.json
+
+# Выходные файлы анализа:
+# 01_single_run_comparison.csv         - сводное сравнение ColdStandby и Hybrid по одному прогону:
+#                                        топливо, downtime, unserved energy, годовые затраты и экономия.
+# 02_single_run_yearly_metrics.csv     - погодовая раскладка single run: энергия, топливо, downtime,
+#                                        потери, O&M и инкрементный денежный поток по годам проекта.
+# 03_monthly_profiles.csv              - помесячные профили генерации и потребления для single run.
+# 04_hourly_profiles.csv               - усреднённые почасовые профили (по часу суток) для single run.
+# 05_system_down_events.csv            - список отдельных событий простоя системы: начало, конец,
+#                                        длительность и схема, в которой произошёл простой.
+# 06_montecarlo_metric_summary.csv     - статистика Monte Carlo по основным метрикам:
+#                                        mean, std, median, p5, p95, min, max.
+# 07_montecarlo_paired_deltas.csv      - попарные разности Hybrid - ColdStandby по каждому MC-прогону;
+#                                        показывает выигрыш/проигрыш гибрида.
+# 08_single_run_economic_cashflows.csv - таблица денежных потоков для экономики по single run:
+#                                        annual benefit, discounted cash flow, cumulative DCF.
+# 09_montecarlo_economics_runs.csv     - экономика по каждому Monte Carlo прогону:
+#                                        annual benefit, NPV, PI, IRR, payback и др.
+# 10_montecarlo_economics_summary.csv  - сводная статистика экономических результатов Monte Carlo.
+#
+# JSON-файлы:
+# single_run_economic_kpis.json        - итоговые KPI экономики для single run (NPV, PI, IRR, PP, DPP).
+# final_economic_kpis.json             - финальные KPI, используемые в выводе
+#                                        (MC или single run в зависимости от config).
+# run_metadata.json                    - служебная информация о запуске: использованный config,
+#                                        пути к входным файлам и выходной директории.
+#
+# Графики (папка charts/):
+# single_run_fuel_and_downtime.png     - сравнение расхода топлива и downtime в single run.
+# hybrid_monthly_energy_balance.png    - помесячный энергобаланс гибридной системы.
+# monthly_fuel_comparison.png          - сравнение помесячного расхода топлива двух схем.
+# hourly_fuel_profile.png              - средний почасовой профиль расхода топлива.
+# hybrid_soc_first_30_days.png         - степень заряженности батареи батареи гибридной системы за первые 30 суток.
+# mc_fuel_distribution.png             - распределение расхода топлива по Monte Carlo.
+# mc_downtime_distribution.png         - распределение downtime по Monte Carlo.
+# single_run_cashflows.png             - денежные потоки и накопленный дисконтированный эффект single run.
+# mc_npv_distribution.png              - распределение NPV по Monte Carlo.
+#
+# analysis_summary.md                  - короткий текстовый итог анализа для вставки в отчёт/черновик.
+
 from __future__ import annotations
 
 import argparse
@@ -207,19 +249,21 @@ def compute_load_from_cold_hours(df: pd.DataFrame) -> pd.Series:
 
 def enrich_hybrid_hours_with_curtailment(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
-    if "CurtailmentKWh" not in out.columns:
+
+    if "CurtailmentKWh" in out.columns:
+        out["CurtailmentKWh"] = out["CurtailmentKWh"].astype(float)
+    else:
         out["CurtailmentKWh"] = (
             out.get("EPvKWh", 0.0).astype(float)
             - out.get("CoveredByPvKWh", 0.0).astype(float)
             - out.get("ChargeKWh", 0.0).astype(float)
         ).clip(lower=0.0)
-    else:
-        out["CurtailmentKWh"] = out["CurtailmentKWh"].astype(float)
 
-    out["HoursBatteryFullWithPv"] = (
+    out["BatteryFullWithPv"] = (
         out.get("IsFull", False).astype(bool)
         & (out.get("EPvKWh", 0.0).astype(float) > 0.0)
     ).astype(int)
+
     return out
 
 
@@ -264,10 +308,10 @@ def build_yearly_metrics(
     econ: EconomicAssumptions,
     outage_model: OutageLossModel,
 ) -> pd.DataFrame:
-    h = assign_project_years(enrich_hybrid_hours_with_curtailment(hybrid_hours))
+    h = assign_project_years(hybrid_hours)
     c = assign_project_years(cold_hours)
 
-    h = h.copy()
+    h = enrich_hybrid_hours_with_curtailment(h.copy())
     c = c.copy()
     h["LoadKWh"] = compute_load_from_hybrid_hours(h)
     c["LoadKWh"] = compute_load_from_cold_hours(c)
@@ -288,12 +332,7 @@ def build_yearly_metrics(
         OutageCostUsd=("OutageCostUsd", "sum"),
         AvgSocKWh=("SocKWh", "mean"),
         CurtailmentKWh=("CurtailmentKWh", "sum"),
-        HoursBatteryFullWithPv=("HoursBatteryFullWithPv", "sum"),
-    )
-    hybrid_yearly["CurtailmentPctOfPv"] = np.where(
-        hybrid_yearly["PvGenerationKWh"] > 0.0,
-        hybrid_yearly["CurtailmentKWh"] / hybrid_yearly["PvGenerationKWh"],
-        0.0,
+        HoursBatteryFullWithPv=("BatteryFullWithPv", "sum"),
     )
 
     cold_yearly = c.groupby("ProjectYear", as_index=False).agg(
@@ -324,6 +363,9 @@ def build_yearly_metrics(
     out["DiscountedNetBenefitUsd"] = out["IncrementalNetBenefitUsd"] * out["DiscountFactor"]
     out["CumulativeDiscountedUsd"] = -float(econ.hybrid_capex_usd) + out["DiscountedNetBenefitUsd"].cumsum()
     out["CumulativeUndiscountedUsd"] = -float(econ.hybrid_capex_usd) + out["IncrementalNetBenefitUsd"].cumsum()
+    out["CurtailmentPctOfPv"] = out.apply(
+        lambda row: percent(safe_div(row["CurtailmentKWh"], row["PvGenerationKWh"])), axis=1
+    )
     return out
 
 
@@ -332,7 +374,7 @@ def build_yearly_metrics(
 # -----------------------------
 
 def build_monthly_profiles(hybrid_hours: pd.DataFrame, cold_hours: pd.DataFrame) -> pd.DataFrame:
-    h = enrich_hybrid_hours_with_curtailment(hybrid_hours)
+    h = enrich_hybrid_hours_with_curtailment(hybrid_hours.copy())
     c = cold_hours.copy()
     h["Month"] = h["TimestampMsk"].dt.month
     c["Month"] = c["TimestampMsk"].dt.month
@@ -351,9 +393,12 @@ def build_monthly_profiles(hybrid_hours: pd.DataFrame, cold_hours: pd.DataFrame)
         AvgSocKWh=("SocKWh", "mean"),
         DownHours=("SystemDown", lambda s: int(s.astype(bool).sum())),
         CurtailmentKWh=("CurtailmentKWh", "sum"),
-        HoursBatteryFullWithPv=("HoursBatteryFullWithPv", "sum"),
+        HoursBatteryFullWithPv=("BatteryFullWithPv", "sum"),
     )
     hybrid_monthly["LoadKWh"] = h.groupby("Month")["LoadKWh"].sum().values / h.groupby("Month")["TimestampMsk"].nunique().values * h.groupby("Month")["TimestampMsk"].nunique().values
+    hybrid_monthly["CurtailmentPctOfPv"] = hybrid_monthly.apply(
+        lambda row: percent(safe_div(row["CurtailmentKWh"], row["PvGenerationKWh"])), axis=1
+    )
 
     cold_monthly = c.groupby("Month", as_index=False).agg(
         Scenario=("TimestampMsk", lambda _: "ColdStandby"),
@@ -369,16 +414,11 @@ def build_monthly_profiles(hybrid_hours: pd.DataFrame, cold_hours: pd.DataFrame)
         DownHours=("SystemDown", lambda s: int(s.astype(bool).sum())),
         CurtailmentKWh=("TimestampMsk", lambda _: 0.0),
         HoursBatteryFullWithPv=("TimestampMsk", lambda _: 0),
+        CurtailmentPctOfPv=("TimestampMsk", lambda _: 0.0),
     )
     cold_monthly["FuelUsedL"] = cold_monthly["PrimaryFuelUsedL"] + cold_monthly["ReserveFuelUsedL"]
     cold_monthly = cold_monthly.drop(columns=["PrimaryFuelUsedL", "ReserveFuelUsedL"])
     cold_monthly["LoadKWh"] = c.groupby("Month")["LoadKWh"].sum().values / c.groupby("Month")["TimestampMsk"].nunique().values * c.groupby("Month")["TimestampMsk"].nunique().values
-    hybrid_monthly["CurtailmentPctOfPv"] = np.where(
-        hybrid_monthly["PvGenerationKWh"] > 0.0,
-        hybrid_monthly["CurtailmentKWh"] / hybrid_monthly["PvGenerationKWh"],
-        0.0,
-    )
-    cold_monthly["CurtailmentPctOfPv"] = 0.0
 
     out = pd.concat([hybrid_monthly, cold_monthly], ignore_index=True)
     out = out.sort_values(["Scenario", "Month"]).reset_index(drop=True)
@@ -386,7 +426,7 @@ def build_monthly_profiles(hybrid_hours: pd.DataFrame, cold_hours: pd.DataFrame)
 
 
 def build_hourly_profiles(hybrid_hours: pd.DataFrame, cold_hours: pd.DataFrame) -> pd.DataFrame:
-    h = enrich_hybrid_hours_with_curtailment(hybrid_hours)
+    h = enrich_hybrid_hours_with_curtailment(hybrid_hours.copy())
     c = cold_hours.copy()
     h["Hour"] = h["TimestampMsk"].dt.hour
     c["Hour"] = c["TimestampMsk"].dt.hour
@@ -401,7 +441,7 @@ def build_hourly_profiles(hybrid_hours: pd.DataFrame, cold_hours: pd.DataFrame) 
         UnservedEnergyKWh=("UnservedEnergyKWh", "mean"),
         AvgSocKWh=("SocKWh", "mean"),
         CurtailmentKWh=("CurtailmentKWh", "mean"),
-        HoursBatteryFullWithPvShare=("HoursBatteryFullWithPv", "mean"),
+        HoursBatteryFullWithPvShare=("BatteryFullWithPv", "mean"),
     )
     cold_profile = c.groupby("Hour", as_index=False).agg(
         Scenario=("TimestampMsk", lambda _: "ColdStandby"),
@@ -511,22 +551,11 @@ def build_single_run_comparison(
                 float(hybrid_summary.get("PvToLoadKWh", 0.0)) + float(hybrid_summary.get("BatteryToLoadKWh", 0.0)),
                 hybrid_load,
             )),
-            "CurtailmentKWh": float(hybrid_summary.get(
-                "CurtailmentKWh",
-                yearly_cashflows["CurtailmentKWh_Hybrid"].sum() if "CurtailmentKWh_Hybrid" in yearly_cashflows.columns
-                else yearly_cashflows["CurtailmentKWh"].sum() if "CurtailmentKWh" in yearly_cashflows.columns
-                else 0.0,
-            )),
+            "CurtailmentKWh": float(hybrid_summary.get("CurtailmentKWh", yearly_cashflows["CurtailmentKWh"].sum())),
             "CurtailmentPctOfPv": percent(safe_div(
-                float(hybrid_summary.get(
-                    "CurtailmentKWh",
-                    yearly_cashflows["CurtailmentKWh_Hybrid"].sum() if "CurtailmentKWh_Hybrid" in yearly_cashflows.columns
-                    else yearly_cashflows["CurtailmentKWh"].sum() if "CurtailmentKWh" in yearly_cashflows.columns
-                    else 0.0,
-                )),
+                float(hybrid_summary.get("CurtailmentKWh", yearly_cashflows["CurtailmentKWh"].sum())),
                 float(hybrid_summary.get("TotalPvGenerationKWh", 0.0)),
             )),
-            "HoursBatteryFullWithPv": float(yearly_cashflows["HoursBatteryFullWithPv_Hybrid"].sum()) if "HoursBatteryFullWithPv_Hybrid" in yearly_cashflows.columns else float(yearly_cashflows["HoursBatteryFullWithPv"].sum()) if "HoursBatteryFullWithPv" in yearly_cashflows.columns else 0.0,
             "AnnualOmUsd": float(econ.annual_om_hybrid_usd),
             "OutageCostUsd": float(yearly_cashflows["OutageCostUsd_Hybrid"].sum()),
             "OperatingCostUsd": float(yearly_cashflows["OperatingCostHybridUsd"].sum()),
@@ -547,7 +576,6 @@ def build_single_run_comparison(
             "RenewableCoveragePct": 0.0,
             "CurtailmentKWh": 0.0,
             "CurtailmentPctOfPv": 0.0,
-            "HoursBatteryFullWithPv": 0.0,
             "AnnualOmUsd": float(econ.annual_om_baseline_usd),
             "OutageCostUsd": float(yearly_cashflows["OutageCostUsd_Cold"].sum()),
             "OperatingCostUsd": float(yearly_cashflows["OperatingCostColdUsd"].sum()),
@@ -956,11 +984,13 @@ def plot_hybrid_soc_sample(hybrid_hours: pd.DataFrame, output: Path) -> None:
 
 def plot_mc_histograms(hybrid_mc: pd.DataFrame, cold_mc: pd.DataFrame, output: Path, metric: str, title: str) -> None:
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.hist(cold_mc[metric].astype(float), bins=30, alpha=0.6, label="ColdStandby")
-    ax.hist(hybrid_mc[metric].astype(float), bins=30, alpha=0.6, label="Hybrid")
+    data = [
+        cold_mc[metric].astype(float).dropna().values,
+        hybrid_mc[metric].astype(float).dropna().values,
+    ]
+    ax.boxplot(data, labels=["ColdStandby", "Hybrid"], vert=True)
     ax.set_title(title)
-    ax.set_xlabel(metric)
-    ax.legend()
+    ax.set_ylabel(metric)
     fig.tight_layout()
     fig.savefig(output, dpi=150)
     plt.close(fig)
@@ -1031,12 +1061,10 @@ def render_markdown_report(
     lines.append(f"- Down hours, hybrid: **{int(hybrid_row['SystemDownHours'])} ч**")
     lines.append(f"- Unserved energy, cold standby: **{cold_row['UnservedEnergyKWh']:.4f} кВт·ч**")
     lines.append(f"- Unserved energy, hybrid: **{hybrid_row['UnservedEnergyKWh']:.4f} кВт·ч**")
-    if "CurtailmentKWh" in hybrid_row:
-        lines.append(f"- Curtailment, hybrid: **{hybrid_row['CurtailmentKWh']:.4f} кВт·ч**")
-    if "CurtailmentPctOfPv" in hybrid_row:
-        lines.append(f"- Curtailment share of PV, hybrid: **{hybrid_row['CurtailmentPctOfPv']:.4f}%**")
-    if "HoursBatteryFullWithPv" in hybrid_row:
-        lines.append(f"- Hours battery full with PV available, hybrid: **{hybrid_row['HoursBatteryFullWithPv']:.0f} ч**")
+    if "CurtailmentKWh" in hybrid_row.index:
+        lines.append(f"- Curtailed energy, hybrid: **{hybrid_row['CurtailmentKWh']:.4f} кВт·ч**")
+    if "CurtailmentPctOfPv" in hybrid_row.index:
+        lines.append(f"- Curtailed share of PV, hybrid: **{hybrid_row['CurtailmentPctOfPv']:.4f}%**")
     lines.append("")
     lines.append("## 3. Экономика по почасовому single run")
     lines.append("")

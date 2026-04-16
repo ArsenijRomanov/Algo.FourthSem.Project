@@ -1,5 +1,5 @@
 {
-  "scenarioType": "ColdStandby",
+  "scenarioType": "Hybrid",
   "singleRun": false,
   "singleRunSeed": 17,
   "runCount": 1000,
