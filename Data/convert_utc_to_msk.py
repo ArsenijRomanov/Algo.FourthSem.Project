@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
+
 def convert_utc_to_msk(input_file: str, output_file: str) -> None:
     input_path = Path(input_file)
     output_path = Path(output_file)
@@ -15,15 +16,18 @@ def convert_utc_to_msk(input_file: str, output_file: str) -> None:
 
     df = pd.read_csv(input_path)
 
-    column_name = "datetime_utc"
-    if column_name not in df.columns:
-        raise ValueError(f"В файле нет столбца '{column_name}'")
+    source_column = "datetime_utc"
+    target_column = "datetime_msk"
 
-    # Парсим UTC-время, прибавляем 3 часа и полностью заменяем исходный столбец
-    dt = pd.to_datetime(df[column_name], format="%Y-%m-%d %H:%M:%S", errors="raise")
+    if source_column not in df.columns:
+        raise ValueError(f"В файле нет столбца '{source_column}'")
+
+    # Парсим UTC-время, прибавляем 3 часа и заменяем исходный столбец
+    dt = pd.to_datetime(df[source_column], format="%Y-%m-%d %H:%M:%S", errors="raise")
     dt_msk = dt + pd.Timedelta(hours=3)
 
-    df[column_name] = dt_msk.dt.strftime("%Y-%m-%d %H:%M:%S")
+    df[source_column] = dt_msk.dt.strftime("%Y-%m-%d %H:%M:%S")
+    df = df.rename(columns={source_column: target_column})
 
     df.to_csv(output_path, index=False)
     print(f"Готово: {output_path}")
@@ -31,7 +35,7 @@ def convert_utc_to_msk(input_file: str, output_file: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Конвертировать столбец datetime_utc из UTC в МСК (UTC+3) и сохранить новый CSV."
+        description="Конвертировать столбец datetime_utc из UTC в МСК (UTC+3), переименовать его в datetime_msk и сохранить новый CSV."
     )
     parser.add_argument("input_file", help="Путь к исходному CSV-файлу")
     parser.add_argument("output_file", help="Путь к новому CSV-файлу")
