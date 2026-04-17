@@ -172,14 +172,12 @@ tensorboard/
 runs/
 
 # =========================
-# EDA results
+# Results
 # =========================
 EDA/05_statistics/
 EDA/06_seasonality/
 EDA/07_diurnal_profiles/
 EDA/08_relationships/
 EDA/09_anomalies/
-
-
-
-
+Analysis/AnalysisResults/
+Model/Model.Runner/Results/

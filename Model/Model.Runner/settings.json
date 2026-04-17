@@ -1,10 +1,10 @@
 {
-  "scenarioType": "Hybrid",
+  "scenarioType": "ColdStandby",
   "singleRun": false,
   "singleRunSeed": 17,
   "runCount": 1000,
   "weatherCsvPath": "data/weather_msk.csv",
-  "outputDirectory": "../../../Results/output",
+  "outputDirectory": "../../../Results/ColdStandby_1000",
 
   "hybrid": {
     "load": {
