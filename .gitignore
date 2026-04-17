@@ -170,3 +170,16 @@ temp/
 wandb/
 tensorboard/
 runs/
+
+# =========================
+# EDA results
+# =========================
+EDA/05_statistics/
+EDA/06_seasonality/
+EDA/07_diurnal_profiles/
+EDA/08_relationships/
+EDA/09_anomalies/
+
+
+
+
