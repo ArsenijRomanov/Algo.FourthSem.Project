@@ -1,0 +1,9 @@
+﻿Metric,DirectionForHybrid,MeanDelta_HybridMinusCold,P05Delta,MedianDelta,P95Delta,ProbabilityHybridBetter
+Availability,higher_is_better,-0.00011961482292807669,-0.00043355239138376245,0.0,0.0,0.0
+DieselToLoadKWh,n/a,-48476.140517026004,-48500.151227563394,-48467.11254672368,-48467.11254672368,
+FuelUsedL,lower_is_better,-14542.842155071017,-14550.045368232219,-14540.13376398032,-14540.13376398032,1.0
+HoursLoadFullyCovered,n/a,-10.484,-38.0,0.0,0.0,
+SystemDownHours,lower_is_better,10.484,0.0,0.0,38.0,0.0
+TotalDieselEnergyKWh,lower_is_better,-48476.140517026004,-48500.151227563394,-48467.11254672368,-48467.11254672368,1.0
+TotalLoadKWh,n/a,0.0,0.0,0.0,0.0,
+UnservedEnergyKWh,lower_is_better,9.027970302332328,0.0,0.0,33.03868083971389,0.0

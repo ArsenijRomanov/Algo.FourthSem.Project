@@ -1,0 +1,54 @@
+{
+  "config": {
+    "paths": {
+      "results_root": "Results",
+      "output_dir": "AnalysisResults"
+    },
+    "study_mapping": {
+      "coldstandby_single_dir": "ColdStandby_1",
+      "coldstandby_mc_dir": "ColdStandby_1000",
+      "hybrid_single_dir": "Hybrid_1",
+      "hybrid_mc_dir": "Hybrid_1000"
+    },
+    "economic_assumptions": {
+      "currency": "USD",
+      "project_horizon_years": 10,
+      "discount_rate": 0.16,
+      "fuel_price_usd_per_l": 5.0,
+      "hybrid_capex_usd": 15000.0,
+      "annual_om_baseline_usd": 700.0,
+      "annual_om_hybrid_usd": 300.0
+    },
+    "outage_loss_model": {
+      "mode": "per_down_hour",
+      "loss_usd_per_down_hour": 3.52,
+      "also_count_partial_unserved_hours": false,
+      "loss_usd_per_unserved_kwh": 0.0
+    },
+    "analysis_options": {
+      "use_mc_for_final_economics": true,
+      "use_single_run_for_time_series_plots": true,
+      "simple_payback": true,
+      "discounted_payback": true,
+      "compute_npv": true,
+      "compute_pi": true,
+      "compute_irr": true
+    },
+    "report_outputs": {
+      "save_csv": true,
+      "save_json": true,
+      "save_png": true,
+      "save_markdown_summary": true
+    }
+  },
+  "resolved_results_root": "/Users/arsenij/SPbU/Algo.FourthSem/Algo.FourthSem.Project/Analysis/Results",
+  "resolved_output_dir": "/Users/arsenij/SPbU/Algo.FourthSem/Algo.FourthSem.Project/Analysis/AnalysisResults",
+  "files": {
+    "cold_single_summary": "/Users/arsenij/SPbU/Algo.FourthSem/Algo.FourthSem.Project/Analysis/Results/ColdStandby_1/coldstandby_summary_seed_17.json",
+    "cold_single_hours": "/Users/arsenij/SPbU/Algo.FourthSem/Algo.FourthSem.Project/Analysis/Results/ColdStandby_1/coldstandby_hours_seed_17.csv",
+    "cold_mc_summaries": "/Users/arsenij/SPbU/Algo.FourthSem/Algo.FourthSem.Project/Analysis/Results/ColdStandby_1000/coldstandby_montecarlo_summaries.json",
+    "hybrid_single_summary": "/Users/arsenij/SPbU/Algo.FourthSem/Algo.FourthSem.Project/Analysis/Results/Hybrid_1/hybrid_summary_seed_17.json",
+    "hybrid_single_hours": "/Users/arsenij/SPbU/Algo.FourthSem/Algo.FourthSem.Project/Analysis/Results/Hybrid_1/hybrid_hours_seed_17.csv",
+    "hybrid_mc_summaries": "/Users/arsenij/SPbU/Algo.FourthSem/Algo.FourthSem.Project/Analysis/Results/Hybrid_1000/hybrid_montecarlo_summaries.json"
+  }
+}

@@ -1,0 +1,2 @@
+﻿Scenario,EventId,Start,End,DurationHours,UnservedEnergyKWh
+Hybrid,1,2021-02-23 23:00:00,2021-02-24 08:00:00,10,9.836762344974986
