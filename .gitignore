@@ -180,4 +180,7 @@ EDA/07_diurnal_profiles/
 EDA/08_relationships/
 EDA/09_anomalies/
 Analysis/AnalysisResults/
+Analysis/Results/
 Model/Model.Runner/Results/
+*.sqlite
+

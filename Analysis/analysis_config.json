@@ -1,6 +1,6 @@
 {
   "paths": {
-    "results_root": "../Model/Model.Runner/Results",
+    "results_root": "Results",
     "output_dir": "AnalysisResults"
   },
 
